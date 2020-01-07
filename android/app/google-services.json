@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "364770503528",
+    "firebase_url": "https://mathlab-840d7.firebaseio.com",
+    "project_id": "mathlab-840d7",
+    "storage_bucket": "mathlab-840d7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:364770503528:android:dcbf39ab5fccf948c4c4dd",
+        "android_client_info": {
+          "package_name": "com.mathapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "364770503528-olce1dmkrm8j8o0g2fauh426j2u9m590.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkA0iXCFfMHN00-0ybg5CVgvCoTqPPCyg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "364770503528-olce1dmkrm8j8o0g2fauh426j2u9m590.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
