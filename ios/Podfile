@@ -38,6 +38,8 @@ target 'mathApp' do
 
   pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
+  pod 'RNFBMLVision', :path => '../node_modules/@react-native-firebase/ml-vision'
+
   target 'mathAppTests' do
     inherit! :search_paths
     # Pods for testing
