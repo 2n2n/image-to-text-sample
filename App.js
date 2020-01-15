@@ -8,157 +8,179 @@
 
 import React from 'react';
 import {
-  SafeAreaView,
+  Modal,
   StyleSheet,
-  ScrollView,
   View,
   Text,
-  StatusBar,
-  TouchableOpacity
 } from 'react-native';
 import RNTextDetector from 'react-native-text-detector';
-import vision from '@react-native-firebase/ml-vision';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 import { RNCamera } from 'react-native-camera';
-import { Container, Content, Body } from 'native-base';
-import ViewPort from './src/service/ViewPort'
+import ViewPort from './src/service/ViewPort';
+
 import Api from './src/service/Api';
+import {
+  Container,
+  Content,
+  Footer,
+  Header,
+  Left,
+  Body,
+  Right,
+  Spinner,
+  Button,
+  Icon,
+  Title,
+  FooterTab,
+  Accordion
+} from 'native-base';
+
+import { Col, Grid } from 'react-native-easy-grid';
+
+const CameraView = () => { 
+  return (<View
+    style={styles.target}>
+
+  </View>)
+}
 
 class App extends React.Component {
   camera;
   constructor(props) { 
     super(props);
     this.viewPortService = new ViewPort;
+
+    this.state = {
+      message: 'Scan Any Equation',
+      visible: false,
+      stepSolution: [],
+    }
   }
 
   takePicture = async () => {
     try {
       const options = {
-        quality: 0.8,
+        quality: 1,
         base64: true,
         skipProcessing: true,
       };
+
+      this.setState({ message: 'Scanning...'})
       const { uri } = await this.camera.takePictureAsync(options);
       const visionResp = await RNTextDetector.detectFromUri(uri);
-      console.log(visionResp, 'text detected..')
-      const equationResponse = await Api.scanEquation(visionResp[0].text);
-      console.log(equationResponse)
+      this.setState({ message: visionResp[0].text.toLowerCase() });
+      const equationResponse = await Api.scanEquation(visionResp[0].text.toLowerCase());
+      
+      if (equationResponse.length > 0) {
+        this.setState({
+          stepSolution: equationResponse,
+          visible: true
+        })
+      }
 
     } catch (e) {
       console.warn(e);
     }
   }
 
+  renderModal = ()  => { 
+    return (
+      <Modal
+        visible={this.state.visible}
+        animationType={'slide'} >
+        <Container>
+          <Header>
+            <Title>
+              <Text>Solution Explained</Text>
+            </Title>
+            <Right>
+              <Button
+                transparent
+                onPress={() => {
+                  this.setState({ visible: false })
+                }}>
+                <Icon name='close' />
+              </Button>
+            </Right>
+          </Header>
+          <Accordion
+            dataArray={this.state.stepSolution}
+            icon="add"
+            expandedIcon="remove"
+            iconStyle={{ color: "green" }}
+            expandedIconStyle={{ color: "red" }}
+            expanded={0}
+          />
+        </Container>
+      </Modal>
+    )
+  }
+
   render() {
     return (
-      <View style={styles.container}>
-        <RNCamera
-          ref={ref => {
-            this.camera = ref;
-          }}
-          style={styles.preview}
-          type={RNCamera.Constants.Type.back}
-          flashMode={RNCamera.Constants.FlashMode.off}
-          androidCameraPermissionOptions={{
-            title: 'Permission to use camera',
-            message: 'We need your permission to use your camera',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}
-          androidRecordAudioPermissionOptions={{
-            title: 'Permission to use audio recording',
-            message: 'We need your permission to use your audio',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}
-        >
-          <View
-            ref={(ref) => this.viewPort = ref}
-            style={styles.target}>
+      <Container>
+        {this.renderModal()}
+        <Header>
+          <Body style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center"
+          }}>
+            <Title>{this.state.message}</Title>
+          </Body>
+        </Header>
+        <Grid>
+          <Col style={{ flex: 1 }}>
+            <RNCamera
+              ref={ref => {
+                this.camera = ref;
+              }}
+              style={{ flex: 1, width: "100%", backgroundColor: '#fff', justifyContent: "flex-start", alignItems:'center' }}
+              type={RNCamera.Constants.Type.back}
+              flashMode={RNCamera.Constants.FlashMode.off}
+              androidCameraPermissionOptions={{
+                title: 'Permission to use camera',
+                message: 'We need your permission to use your camera',
+                buttonPositive: 'Ok',
+                buttonNegative: 'Cancel',
+              }}
+              androidRecordAudioPermissionOptions={{
+                title: 'Permission to use audio recording',
+                message: 'We need your permission to use your audio',
+                buttonPositive: 'Ok',
+                buttonNegative: 'Cancel',
+              }}
+            >
+              {({ camera, status, recordAudioPermissionStatus }) => {
+                if (status !== 'READY') return <Spinner />;
+                return (
+                  <CameraView />
+                );
+              }}
 
-          </View>
-        </RNCamera>
-        <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity onPress={this.takePicture} style={styles.capture}>
-            <Text style={{ fontSize: 14 }}>SNAP</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            </RNCamera>
+
+          </Col>
+        </Grid>
+        <Footer>
+          <FooterTab>
+            <Button full onPress={this.takePicture}>
+              <Text>SCAN</Text>
+            </Button>
+          </FooterTab>
+        </Footer>
+      </Container>
     );
   }
 };
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: 'black',
-  },
-  preview: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  capture: {
-    flex: 0,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 15,
-    paddingHorizontal: 20,
-    alignSelf: 'center',
-    margin: 20,
-  },
   target: {
     borderWidth: 5,
-    borderColor: 'green',
+    borderColor: 'red',
     height: 100,
-    width: "80%",
-    top: "80%"
+    width: 300,
+    marginTop: 40,
   }
 });
-// const styles = StyleSheet.create({
-//   scrollView: {
-//     backgroundColor: Colors.lighter,
-//   },
-//   engine: {
-//     position: 'absolute',
-//     right: 0,
-//   },
-//   body: {
-//     backgroundColor: Colors.white,
-//   },
-//   sectionContainer: {
-//     marginTop: 32,
-//     paddingHorizontal: 24,
-//   },
-//   sectionTitle: {
-//     fontSize: 24,
-//     fontWeight: '600',
-//     color: Colors.black,
-//   },
-//   sectionDescription: {
-//     marginTop: 8,
-//     fontSize: 18,
-//     fontWeight: '400',
-//     color: Colors.dark,
-//   },
-//   highlight: {
-//     fontWeight: '700',
-//   },
-//   footer: {
-//     color: Colors.dark,
-//     fontSize: 12,
-//     fontWeight: '600',
-//     padding: 4,
-//     paddingRight: 12,
-//     textAlign: 'right',
-//   },
-// });
 
 export default App;

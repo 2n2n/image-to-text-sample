@@ -183,7 +183,7 @@ android {
 dependencies {
     implementation project(':@react-native-firebase_ml-vision')
     implementation project(':react-native-camera')
-    implementation project(':react-native-firebase')
+     implementation project(':react-native-firebase')
     implementation 'com.google.firebase:firebase-analytics:17.2.1'
     
     implementation fileTree(dir: "libs", include: ["*.jar"])
