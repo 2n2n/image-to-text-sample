@@ -11,8 +11,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@react-native-firebase/app": "^6.2.0",
-    "@react-native-firebase/ml-vision": "^6.2.0",
     "axios": "^0.19.1",
     "mathsteps": "^0.2.0",
     "mobx": "^5.15.1",
