@@ -34,10 +34,15 @@ target 'mathApp' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  pod 'RNFirebase', :path => '../node_modules/react-native-firebase'
 
   pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
+
+
+  pod 'RNFBMLVision', :path => '../node_modules/@react-native-firebase/ml-vision'
+
+
+  pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
 
   target 'mathAppTests' do
     inherit! :search_paths

@@ -3,6 +3,7 @@ const express = require('express');
 const mathsteps = require('mathsteps');
 const printUtil = require('mathsteps/lib/util/print');
 const app = express();
+const math = require('mathjs');
 
 const capitalize = (s) => {
     if (typeof s !== 'string') return ''
@@ -44,12 +45,17 @@ app.get('/scan', (request, response) => {
     if (equation == '') {
         response.send([]);
     }
+    
+    const scope = {}
+    math.evaluate('f(x) = 2 * x', scope)
+    console.log(math.evaluate('integrate(f(x), x, 0, 2)', scope)) 
+
     const solvers = {
         solveEquation: mathsteps.solveEquation,
         factor: mathsteps.factor,
         simplifyExpression: mathsteps.simplifyExpression
     }
-
+    
     let steps = [];
     let responseData = ""; 
     for (solver in solvers) { 
@@ -60,6 +66,7 @@ app.get('/scan', (request, response) => {
             break;
         }
     }
+    console.log(responseData)
     response.send(responseData)
 });
 exports.app = functions.https.onRequest(app);

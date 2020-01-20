@@ -9,39 +9,43 @@
 import React from 'react';
 import {
   Modal,
-  StyleSheet,
   View,
   Text,
+  Dimensions,
 } from 'react-native';
-import RNTextDetector from 'react-native-text-detector';
 import { RNCamera } from 'react-native-camera';
 import ViewPort from './src/service/ViewPort';
-
 import Api from './src/service/Api';
 import {
   Container,
-  Content,
-  Footer,
   Header,
-  Left,
-  Body,
   Right,
   Spinner,
   Button,
   Icon,
   Title,
-  FooterTab,
-  Accordion
+  Accordion,
 } from 'native-base';
 
 import { Col, Grid } from 'react-native-easy-grid';
+import BarcodeMask from 'react-native-barcode-mask';
 
-const CameraView = () => { 
-  return (<View
-    style={styles.target}>
 
-  </View>)
-}
+const viewfinderHeight = 100;
+const viewfinderWidth = 300;
+
+const aabb = (obj1, obj2) => obj1.x < obj2.x + obj2.width
+  && obj1.x + obj1.width > obj2.x
+  && obj1.y < obj2.y + obj2.height
+  && obj1.y + obj1.height > obj2.y;
+
+const { height: windowHeight, width: windowWidth } = Dimensions.get('window');
+const viewFinderBounds = {
+  height: viewfinderHeight,
+  width: viewfinderWidth,
+  x: (windowWidth - viewfinderWidth) / 2,
+  y: (windowHeight - viewfinderHeight) / 2,
+};
 
 class App extends React.Component {
   camera;
@@ -53,32 +57,34 @@ class App extends React.Component {
       message: 'Scan Any Equation',
       visible: false,
       stepSolution: [],
+      textBlocks: [],
+      lookingAt: {},
+      isScanning: false
     }
   }
 
   takePicture = async () => {
-    try {
-      const options = {
-        quality: 1,
-        base64: true,
-        skipProcessing: true,
-      };
+    
+    if (this.state.textBlocks.length == 0) {
+      return;
+      // Toast.show({
+      //   text: 'No text detected.',
+      //   buttonText: 'Try again.'
+      // })
+      // return new Promise(resolve => resolve(true)); // do something here to notify user.
+    }
 
-      this.setState({ message: 'Scanning...'})
-      const { uri } = await this.camera.takePictureAsync(options);
-      const visionResp = await RNTextDetector.detectFromUri(uri);
-      this.setState({ message: visionResp[0].text.toLowerCase() });
-      const equationResponse = await Api.scanEquation(visionResp[0].text.toLowerCase());
-      
-      if (equationResponse.length > 0) {
-        this.setState({
+    this.setState({ isScanning: true });
+    const equationResponse = await Api.scanEquation(this.state.textBlocks[0].value);
+    if (equationResponse.length > 0 && equationResponse != "" ) {
+      this.setState({
+          isScanning: false,
           stepSolution: equationResponse,
           visible: true
         })
-      }
-
-    } catch (e) {
-      console.warn(e);
+    }
+    else if (equationResponse == "") {
+      this.setState({ isScanning: false });
     }
   }
 
@@ -116,18 +122,17 @@ class App extends React.Component {
   }
 
   render() {
+    let boundedBoxes = this.state.textBlocks.map((block, idx) =>
+      <View
+        key={idx}
+        style={[
+          { borderColor: 'orange', borderWidth: 1, position: 'absolute', height: 10, width: 10 },
+          block.bounds.size,
+          { top: block.bounds.origin.y, left: block.bounds.origin.x }]}>
+          </View>)
     return (
       <Container>
         {this.renderModal()}
-        <Header>
-          <Body style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center"
-          }}>
-            <Title>{this.state.message}</Title>
-          </Body>
-        </Header>
         <Grid>
           <Col style={{ flex: 1 }}>
             <RNCamera
@@ -149,11 +154,50 @@ class App extends React.Component {
                 buttonPositive: 'Ok',
                 buttonNegative: 'Cancel',
               }}
+              onTextRecognized={({ textBlocks }) => { 
+                if (this.state.isScanning == true) return;
+                const collidingTexts = textBlocks.filter((barcode) => {
+                  let elementBounds = {
+                    height: barcode.bounds.size.height,
+                    width: barcode.bounds.size.width,
+                    x: barcode.bounds.origin.x,
+                    y: barcode.bounds.origin.y,
+                  };
+    
+                  return aabb(viewFinderBounds, elementBounds);
+                });
+                
+                function toLowerCase(obj) { 
+                  obj.value = obj.value.toLowerCase();
+                  return obj;
+                }
+                let scannableText = collidingTexts.length > 0 ? [toLowerCase(collidingTexts[0])]: []
+                this.setState({ textBlocks: scannableText })
+              }}
             >
               {({ camera, status, recordAudioPermissionStatus }) => {
                 if (status !== 'READY') return <Spinner />;
                 return (
-                  <CameraView />
+                  <React.Fragment>
+                    <BarcodeMask
+                      ref={(ref) => this.cameraView = ref}
+                      width={viewfinderWidth}
+                      height={viewfinderHeight}
+                      showAnimatedLine={false}
+                      transparency={0.8} />
+                    {boundedBoxes}
+                    <Text style={{ color: '#fff', fontSize: 20, maxHeight: 30, textAlign: "center" }}>
+                      {this.state.textBlocks[0] != undefined ? this.state.textBlocks[0].value : ''}
+                    </Text>
+                    <Button
+                      disabled={this.state.isScanning}
+                      onPress={this.takePicture}
+                      rounded
+                      block
+                      style={{ margin: 10, top: "100%" }}>
+                      <Text style={{ color: '#fff', fontWeight: 'bold'}}>Scan</Text>
+                    </Button>
+                  </React.Fragment>
                 );
               }}
 
@@ -161,26 +205,10 @@ class App extends React.Component {
 
           </Col>
         </Grid>
-        <Footer>
-          <FooterTab>
-            <Button full onPress={this.takePicture}>
-              <Text>SCAN</Text>
-            </Button>
-          </FooterTab>
-        </Footer>
       </Container>
     );
   }
-};
-
-const styles = StyleSheet.create({
-  target: {
-    borderWidth: 5,
-    borderColor: 'red',
-    height: 100,
-    width: 300,
-    marginTop: 40,
-  }
-});
+  
+}
 
 export default App;

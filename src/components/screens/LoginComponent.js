@@ -13,7 +13,8 @@ import {
     Item,
     Header, Title, Button, Left, Right, Body, Icon
 } from 'native-base';
-import firebase from 'react-native-firebase';
+// import auth, { firebase } from 'react-native-firebase/auth';
+
 
 class LoginComponent extends Component { 
 
@@ -34,20 +35,20 @@ class LoginComponent extends Component {
     }
     onSingInPress = () => { 
         this.setState({ loading: true });
-        firebase
-            .auth()
-            .signInWithEmailAndPassword(this.state.username, this.state.password)
-            .then(this.onLoginSuccess)
-            .catch(this.onLoginFailFirst);
+        // firebase
+        //     .auth()
+        //     .signInWithEmailAndPassword(this.state.username, this.state.password)
+        //     .then(this.onLoginSuccess)
+        //     .catch(this.onLoginFailFirst);
     }
 
     onSingUpPress = () => {
         this.setState({ loading: true });
-        firebase
-            .auth()
-            .createUserWithEmailAndPassword(this.state.username, this.state.password)
-            .then(this.onLoginSuccess)
-            .catch(this.onLoginFailFirst);
+        // firebase
+        //     .auth()
+        //     .createUserWithEmailAndPassword(this.state.username, this.state.password)
+        //     .then(this.onLoginSuccess)
+        //     .catch(this.onLoginFailFirst);
     }
 
     render() {
