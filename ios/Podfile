@@ -44,6 +44,8 @@ target 'mathApp' do
 
   pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
 
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+
   target 'mathAppTests' do
     inherit! :search_paths
     # Pods for testing
