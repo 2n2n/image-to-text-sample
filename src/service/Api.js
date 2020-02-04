@@ -1,6 +1,7 @@
 import axios from 'axios';
 class Api {
     scanEquation(text) {
+        console.log('https://us-central1-mathlab-840d7.cloudfunctions.net/app/scan?text=' + encodeURIComponent(text));
         return axios.get('https://us-central1-mathlab-840d7.cloudfunctions.net/app/scan?text=' + encodeURIComponent(text))
             .then((res) => { 
                 console.log(res, 'response data')

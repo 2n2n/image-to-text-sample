@@ -46,9 +46,9 @@ app.get('/scan', (request, response) => {
         response.send([]);
     }
     
-    const scope = {}
-    math.evaluate('f(x) = 2 * x', scope)
-    console.log(math.evaluate('integrate(f(x), x, 0, 2)', scope)) 
+    // const scope = {}
+    // math.evaluate('f(x) = 2 * x', scope)
+    // console.log(math.evaluate('integrate(f(x), x, 0, 2)', scope)) 
 
     const solvers = {
         solveEquation: mathsteps.solveEquation,
@@ -66,7 +66,7 @@ app.get('/scan', (request, response) => {
             break;
         }
     }
-    console.log(responseData)
+   
     response.send(responseData)
 });
 exports.app = functions.https.onRequest(app);

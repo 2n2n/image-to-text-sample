@@ -10,7 +10,6 @@ import React from 'react';
 import {
   Modal,
   View,
-  Text,
   Dimensions,
 } from 'react-native';
 import { RNCamera } from 'react-native-camera';
@@ -25,7 +24,13 @@ import {
   Icon,
   Title,
   Accordion,
+  Badge,
+  Footer,
+  FooterTab,
+  Text,
 } from 'native-base';
+
+import { Calculator } from 'react-native-calculator'
 
 import { Col, Grid } from 'react-native-easy-grid';
 import BarcodeMask from 'react-native-barcode-mask';
@@ -59,7 +64,8 @@ class App extends React.Component {
       stepSolution: [],
       textBlocks: [],
       lookingAt: {},
-      isScanning: false
+      isScanning: false,
+      scanMode: true
     }
   }
 
@@ -67,11 +73,6 @@ class App extends React.Component {
     
     if (this.state.textBlocks.length == 0) {
       return;
-      // Toast.show({
-      //   text: 'No text detected.',
-      //   buttonText: 'Try again.'
-      // })
-      // return new Promise(resolve => resolve(true)); // do something here to notify user.
     }
 
     this.setState({ isScanning: true });
@@ -135,76 +136,93 @@ class App extends React.Component {
         {this.renderModal()}
         <Grid>
           <Col style={{ flex: 1 }}>
-            <RNCamera
-              ref={ref => {
-                this.camera = ref;
-              }}
-              style={{ flex: 1, width: "100%", backgroundColor: '#fff', justifyContent: "flex-start", alignItems:'center' }}
-              type={RNCamera.Constants.Type.back}
-              flashMode={RNCamera.Constants.FlashMode.off}
-              androidCameraPermissionOptions={{
-                title: 'Permission to use camera',
-                message: 'We need your permission to use your camera',
-                buttonPositive: 'Ok',
-                buttonNegative: 'Cancel',
-              }}
-              androidRecordAudioPermissionOptions={{
-                title: 'Permission to use audio recording',
-                message: 'We need your permission to use your audio',
-                buttonPositive: 'Ok',
-                buttonNegative: 'Cancel',
-              }}
-              onTextRecognized={({ textBlocks }) => { 
-                if (this.state.isScanning == true) return;
-                const collidingTexts = textBlocks.filter((barcode) => {
-                  let elementBounds = {
-                    height: barcode.bounds.size.height,
-                    width: barcode.bounds.size.width,
-                    x: barcode.bounds.origin.x,
-                    y: barcode.bounds.origin.y,
-                  };
-    
-                  return aabb(viewFinderBounds, elementBounds);
-                });
-                
-                function toLowerCase(obj) { 
-                  obj.value = obj.value.toLowerCase();
-                  return obj;
-                }
-                let scannableText = collidingTexts.length > 0 ? [toLowerCase(collidingTexts[0])]: []
-                this.setState({ textBlocks: scannableText })
-              }}
-            >
-              {({ camera, status, recordAudioPermissionStatus }) => {
-                if (status !== 'READY') return <Spinner />;
-                return (
-                  <React.Fragment>
-                    <BarcodeMask
-                      ref={(ref) => this.cameraView = ref}
-                      width={viewfinderWidth}
-                      height={viewfinderHeight}
-                      showAnimatedLine={false}
-                      transparency={0.8} />
-                    {boundedBoxes}
-                    <Text style={{ color: '#fff', fontSize: 20, maxHeight: 30, textAlign: "center" }}>
-                      {this.state.textBlocks[0] != undefined ? this.state.textBlocks[0].value : ''}
-                    </Text>
-                    <Button
-                      disabled={this.state.isScanning}
-                      onPress={this.takePicture}
-                      rounded
-                      block
-                      style={{ margin: 10, top: "100%" }}>
-                      <Text style={{ color: '#fff', fontWeight: 'bold'}}>Scan</Text>
-                    </Button>
-                  </React.Fragment>
-                );
-              }}
+        {this.state.scanMode ? (
+              <RNCamera
+                ref={ref => {
+                  this.camera = ref;
+                }}
+                style={{ flex: 1, width: "100%", backgroundColor: '#fff', justifyContent: "flex-start", alignItems: 'center' }}
+                type={RNCamera.Constants.Type.back}
+                flashMode={RNCamera.Constants.FlashMode.off}
+                androidCameraPermissionOptions={{
+                  title: 'Permission to use camera',
+                  message: 'We need your permission to use your camera',
+                  buttonPositive: 'Ok',
+                  buttonNegative: 'Cancel',
+                }}
+                androidRecordAudioPermissionOptions={{
+                  title: 'Permission to use audio recording',
+                  message: 'We need your permission to use your audio',
+                  buttonPositive: 'Ok',
+                  buttonNegative: 'Cancel',
+                }}
+                onTextRecognized={({ textBlocks }) => {
+                  if (this.state.isScanning == true) return;
+                  const collidingTexts = textBlocks.filter((barcode) => {
+                    let elementBounds = {
+                      height: barcode.bounds.size.height,
+                      width: barcode.bounds.size.width,
+                      x: barcode.bounds.origin.x,
+                      y: barcode.bounds.origin.y,
+                    };
 
-            </RNCamera>
+                    return aabb(viewFinderBounds, elementBounds);
+                  });
 
-          </Col>
+                  function toLowerCase(obj) {
+                    obj.value = obj.value.toLowerCase();
+                    return obj;
+                  }
+                  let scannableText = collidingTexts.length > 0 ? [toLowerCase(collidingTexts[0])] : []
+                  this.setState({ textBlocks: scannableText })
+                }}
+              >
+                {({ camera, status, recordAudioPermissionStatus }) => {
+                  if (status !== 'READY') return <Spinner />;
+                  return (
+                    <React.Fragment>
+                      <BarcodeMask
+                        ref={(ref) => this.cameraView = ref}
+                        width={viewfinderWidth}
+                        height={viewfinderHeight}
+                        showAnimatedLine={false}
+                        transparency={0.8} />
+                      {boundedBoxes}
+                      <Text style={{ color: '#fff', fontSize: 20, maxHeight: 30, textAlign: "center" }}>
+                        {this.state.textBlocks[0] != undefined ? this.state.textBlocks[0].value : ''}
+                      </Text>
+                      <Button
+                        disabled={this.state.isScanning}
+                        onPress={this.takePicture}
+                        rounded
+                        block
+                        style={{ margin: 10, top: "100%" }}>
+                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Scan</Text>
+                      </Button>
+                    </React.Fragment>
+                  );
+                }}
+
+              </RNCamera>
+            ) : <Calculator
+                onTextChange={(text) => this.setState({ textBlocks: [{ value: text, bounds: { size: {}, origin: {x: 0, y:0}} }]})}
+                onCalc={(number, text) => this.takePicture() }
+                style={{ flex: 1 }} />}
+            </Col>
         </Grid>
+        <Footer>
+          <FooterTab>
+            <Button vertical active={this.state.scanMode} onPress={() => this.setState({scanMode: true})}>
+              <Icon name="camera" />
+              <Text>Scan</Text>
+            </Button>
+
+            <Button vertical active={!this.state.scanMode} onPress={() => this.setState({ scanMode: false })}>
+              <Icon name="calculator" />
+              <Text>Calculator</Text>
+            </Button>
+          </FooterTab>
+        </Footer>
       </Container>
     );
   }

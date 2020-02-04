@@ -5422,6 +5422,11 @@ react-native-barcode-mask@^1.1.0:
   dependencies:
     prop-types "^15.6.2"
 
+react-native-calculator@^0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/react-native-calculator/-/react-native-calculator-0.5.2.tgz#e71f94f8601382b50a55ef21d5776c7f827b5ac3"
+  integrity sha512-KAsWEP9a56r8RyORudx+YGvMhTYdIK4eJ2Gcps1Yu6r1OszFziaKASDnvlFN8uTOFwAwGGsacj8cMJtV3D8hQA==
+
 react-native-camera@^3.15.1:
   version "3.15.1"
   resolved "https://registry.yarnpkg.com/react-native-camera/-/react-native-camera-3.15.1.tgz#8e4eb67cb6687b5250f849b348f0d19a01649105"
